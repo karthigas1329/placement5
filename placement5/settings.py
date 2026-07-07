@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'placementapp',
 ]
-
+AUTH_USER_MODEL = 'placementapp.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
