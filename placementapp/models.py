@@ -108,3 +108,79 @@ class StudentCoordinator(models.Model):
 
     def __str__(self):
         return self.full_name
+    
+from django.db import models
+
+class PlacementOfficer(models.Model):
+    DESIGNATION_CHOICES = [
+        ('professor', 'Professor'),
+        ('trainer', 'Trainer'),
+        ('admin', 'Administrator'),
+    ]
+
+    full_name = models.CharField(max_length=200)
+    official_email = models.EmailField(unique=True)
+    country_code = models.CharField(max_length=10, default="+91")
+    phone_number = models.CharField(max_length=15)
+    organization_name = models.CharField(max_length=200)
+    department = models.CharField(max_length=200)
+    employee_id = models.CharField(max_length=100)
+    designation = models.CharField(max_length=50, choices=DESIGNATION_CHOICES)
+    password = models.CharField(max_length=255)
+    registered_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.full_name
+
+
+#login
+#common login 
+
+from django.contrib.auth.models import AbstractUser
+from .managers import UserManager
+class User(AbstractUser):
+
+    ROLE_CHOICES = (
+        ("student", "Student"),
+        ("recruiter", "Recruiter"),
+        ("placement_officer", "Placement Officer"),
+        ("training_coordinator", "Training Coordinator"),
+    )
+    username = None
+    email = models.EmailField(unique=True)
+    full_name = models.CharField(max_length=150)
+    phone_number = models.CharField(max_length=15)
+    role = models.CharField(max_length=30,choices=ROLE_CHOICES)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
+    
+
+#placement officer login
+
+class PlacementOfficer(models.Model):
+
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
+    
+#studentlogin
+
+class StudentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
+    country_code = models.CharField(max_length=10, default='+1')
+    phone_number = models.CharField(max_length=20)
+    institution_name = models.CharField(max_length=255)
+    degree = models.CharField(max_length=100)
+    graduation_year = models.IntegerField()
+    student_id = models.CharField(max_length=50, unique=True)
+    registered_on = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Student Profile for {self.user.email}"
