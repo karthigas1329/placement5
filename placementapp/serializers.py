@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import PlacementOfficer
 
 #registration
 #placement officer
-
+from .models import PlacementOfficer
 class PlacementOfficerSerializer(serializers.ModelSerializer):
     confirmPassword = serializers.CharField(write_only=True)
 
@@ -58,7 +57,7 @@ from django.db import transaction
 from .models import StudentProfile
 import re
 
-User = get_user_model()
+StudentRegistrationUser = get_user_model()
 
 class StudentRegistrationSerializer(serializers.Serializer):
     fullName = serializers.CharField(max_length=255)
@@ -73,7 +72,7 @@ class StudentRegistrationSerializer(serializers.Serializer):
     confirmPassword = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        if StudentRegistrationUser.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
         return value
 
@@ -115,12 +114,12 @@ class StudentRegistrationSerializer(serializers.Serializer):
         email = validated_data.pop('email')
 
         with transaction.atomic():
-            user = User.objects.create_user(
+            user = StudentRegistrationUser.objects.create_user(
                 email=email,
                 username=email,
                 full_name=fullName,
                 password=password,
-                role=User.Role.STUDENT
+                role=StudentRegistrationUser.Role.STUDENT
             )
 
             StudentProfile.objects.create(
@@ -148,54 +147,12 @@ class StudentCoordinatorSerializer(serializers.ModelSerializer):
                 "write_only": True
             }
         }
-from rest_framework import serializers
-from django.contrib.auth.hashers import make_password
-from .models import PlacementOfficer
-
-
-class PlacementOfficerSerializer(serializers.ModelSerializer):
-    confirmPassword = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = PlacementOfficer
-        fields = [
-            'id',
-            'full_name',
-            'official_email',
-            'country_code',
-            'phone_number',
-            'organization_name',
-            'department',
-            'employee_id',
-            'designation',
-            'password',
-            'confirmPassword',
-            'registered_on'
-        ]
-        read_only_fields = ['id', 'registered_on']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
-
-    def validate(self, attrs):
-        if attrs['password'] != attrs['confirmPassword']:
-            raise serializers.ValidationError(
-                {"confirmPassword": "Passwords do not match."}
-            )
-        return attrs
-
-    def create(self, validated_data):
-        validated_data.pop('confirmPassword')
-        validated_data['password'] = make_password(validated_data['password'])
-        return PlacementOfficer.objects.create(**validated_data)
 
 #login
 
 #common login
-from rest_framework import serializers
 
-
-class LoginSerializer(serializers.Serializer):
+class commonLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     role = serializers.ChoiceField(
@@ -207,15 +164,55 @@ class LoginSerializer(serializers.Serializer):
         ]
     )
 
-#placement officer login
+#placementofficerlogin
 
-from .models import PlacementOfficer
+from .models import PlacementOfficerlogin
 
-class PlacementOfficerSerializer(serializers.ModelSerializer):
+class PlacementOfficerloginSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = PlacementOfficer
+        model = PlacementOfficerlogin
         fields = "__all__"
 
-#student login
+#recruiterlogin
+from .models import RecruiterLogin
 
+class RecruiterLoginSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RecruiterLogin
+        fields = "__all__"
+
+#trainingcoordinator login
+
+class TrainingCoordinatorLoginSerializer(serializers.Serializer):
+
+    Email = serializers.EmailField()
+    password = serializers.CharField()
+
+#adminlogin
+
+from .models import Admin
+
+class AdminLoginSerializer(serializers.Serializer):
+    Email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+class AdminSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Admin
+        fields = "__all__"
+        extra_kwargs = {
+            "password": {"write_only": True}
+        }
+
+#forgotpassword
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    uid = serializers.CharField()
+    password = serializers.CharField(min_length=8)
