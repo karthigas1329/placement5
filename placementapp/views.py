@@ -593,16 +593,216 @@ from .serializers import DashboardSummarySerializer
 class TrainingCoordinatorDashboardView(APIView):
 
     def get(self, request):
-        dashboard = DashboardSummary.objects.first()
+        dashboard_data = {
+        "status": "success",
+        "data": {
 
-        if dashboard is None:
-            return Response({
-                "message": "No dashboard summary data available."
-            })
+            "stats": {
+                "activeBatches": 1250,
+                "totalEnrollments": 462,
+                "certificatesIssued": 199,
+                "upcomingSessions": 35,
+            },
 
-        serializer = DashboardSummarySerializer(dashboard)
-        return Response(serializer.data)    
+            "upcomingSessions": [
+                {
+                    "id": 1,
+                    "time": "10:00",
+                    "period": "AM",
+                    "title": "Full Stack",
+                    "courseCode": "FS-DP-07",
+                    "location": "FS-DP-07. Lab 1, Block A",
+                    "status": "Scheduled",
+                },
+                {
+                    "id": 2,
+                    "time": "11:30",
+                    "period": "AM",
+                    "title": "Python Programming",
+                    "courseCode": "PY-08",
+                    "location": "PY-08. Lab 2, Block B",
+                    "status": "In-Progress",
+                },
+                {
+                    "id": 3,
+                    "time": "02:00",
+                    "period": "PM",
+                    "title": "UI/UX Design",
+                    "courseCode": "UIUX-06",
+                    "location": "UIUX-06. Design Studio",
+                    "status": "Scheduled",
+                },
+                {
+                    "id": 4,
+                    "time": "04:30",
+                    "period": "PM",
+                    "title": "Trainer Meeting",
+                    "courseCode": "MEETING-01",
+                    "location": "Conference Room",
+                    "status": "Meeting",
+                },
+            ],
+
+            "trainerAvailability": [
+                {
+                    "id": 1,
+                    "name": "Sam Son",
+                    "role": "Full Stack",
+                    "status": "Available",
+                },
+                {
+                    "id": 2,
+                    "name": "David",
+                    "role": "Python",
+                    "status": "In Session",
+                },
+                {
+                    "id": 3,
+                    "name": "Sneha",
+                    "role": "Data Analytics",
+                    "status": "On Leave",
+                },
+                {
+                    "id": 4,
+                    "name": "Angel",
+                    "role": "UI/UX",
+                    "status": "Available",
+                },
+            ],
+
+            "readiness": [
+                {
+                    "name": "Ready",
+                    "value": 845,
+                    "color": "#6ECEE9",
+                },
+                {
+                    "name": "Need Mock Interview",
+                    "value": 215,
+                    "color": "#B46BEA",
+                },
+                {
+                    "name": "Resume Pending",
+                    "value": 145,
+                    "color": "#7992E6",
+                },
+                {
+                    "name": "Other Pending",
+                    "value": 65,
+                    "color": "#6409FF",
+                },
+            ],
+
         
+            "recentActivities": [
+                {
+                    "id": 1,
+                    "text": 'New batch "D-12" has been created.',
+                    "date": "July 20 · 09:30 AM",
+                },
+                {
+                    "id": 2,
+                    "text": 'Assessment "Java test published."',
+                    "date": "July 15 · 10:30 AM",
+                },
+                {
+                    "id": 3,
+                    "text": 'Session completed for "UI/UX laws".',
+                    "date": "July 06 · 04:30 AM",
+                },
+                {
+                    "id": 4,
+                    "text": "Certificate issued to 12 students.",
+                    "date": "July 10 · 03:30 AM",
+                },
+                {
+                    "id": 5,
+                    "text": 'New batch "UI-08" has been created.',
+                    "date": "July 11 · 09:30 AM",
+                },
+            ],
+
+            "pendingApprovals": [
+                {
+                    "id": 1,
+                    "title": "Leave Request",
+                    "count": 8,
+                    "countText": "8 Requests",
+                },
+                {
+                    "id": 2,
+                    "title": "Assessment Evaluation",
+                    "count": 15,
+                    "countText": "15 Pending",
+                },
+                {
+                    "id": 3,
+                    "title": "Certificate Requests",
+                    "count": 6,
+                    "countText": "6 Requests",
+                },
+                {
+                    "id": 4,
+                    "title": "Course Transfer",
+                    "count": 3,
+                    "countText": "3 Requests",
+                },
+            ],
+
+
+            "trainingProgress": [
+                {
+                    "id": 1,
+                    "title": "Full Stack",
+                    "code": "FS-DP-07",
+                    "percent": 90,
+                    "completed": 320,
+                    "total": 356,
+                },
+                {
+                    "id": 2,
+                    "title": "Python",
+                    "code": "PY-08",
+                    "percent": 81,
+                    "completed": 286,
+                    "total": 300,
+                },
+                {
+                    "id": 3,
+                    "title": "Data Analytics",
+                    "code": "DA-05",
+                    "percent": 58,
+                    "completed": 145,
+                    "total": 248,
+                },
+                {
+                    "id": 4,
+                    "title": "UI/UX",
+                    "code": "UI-09",
+                    "percent": 94,
+                    "completed": 210,
+                    "total": 223,
+                },
+                {
+                    "id": 5,
+                    "title": "Java",
+                    "code": "JD-04",
+                    "percent": 72,
+                    "completed": 321,
+                    "total": 445,
+                },
+            ],
+
+
+            "attendance": {
+                "present": 1182,
+                "absent": 49,
+                "presentPercentage": 96,
+            },
+        }
+    }
+
+    return Response(dashboard_data)
 
 #recruiter Dashboard
 from rest_framework.permissions import IsAuthenticated
