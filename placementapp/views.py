@@ -738,3 +738,61 @@ class RecruiterDashboardView(APIView):
             'quick_links': quick_links,
         })
 
+#placementofficerdashboard
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+from .models import *
+from .serializers import *
+
+
+class PlacementDashboardView(APIView):
+    def get(self, request):
+        data = {
+        "stats": DashboardStatSerializer(
+            DashboardStat.objects.all(),
+            many=True
+        ).data,
+
+        "pipeline": PipelineSerializer(
+            Pipeline.objects.all(),
+            many=True
+        ).data,
+
+        "quickActions": QuickActionSerializer(
+            QuickAction.objects.all(),
+            many=True
+        ).data,
+
+        "upcomingDrives": UpcomingDriveSerializer(
+            UpcomingDrive.objects.all(),
+            many=True
+        ).data,
+
+        "topCompanies": TopCompanySerializer(
+            TopCompany.objects.all(),
+            many=True
+        ).data,
+
+        "placementStats": PlacementStatsSerializer(
+            PlacementStats.objects.all(),
+            many=True
+        ).data,
+
+        "departmentWise": DepartmentWiseSerializer(
+            DepartmentWise.objects.all(),
+            many=True
+        ).data,
+
+        "recentActivities": RecentActivitySerializer(
+            RecentActivity.objects.all(),
+            many=True
+        ).data,
+
+        "calendarSchedules": CalendarScheduleSerializer(
+            CalendarSchedule.objects.all(),
+            many=True
+        ).data,
+    }
+
+    return Response(data)

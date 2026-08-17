@@ -234,3 +234,67 @@ class DashboardSummary(models.Model):
 
     def __str__(self):
         return "Dashboard Summary"
+
+#placementofficerdashboard
+
+class DashboardStat(models.Model):
+    label = models.CharField(max_length=100)
+    value = models.IntegerField()
+    badge = models.CharField(max_length=100)
+    bg = models.CharField(max_length=30)
+    color = models.CharField(max_length=30)
+
+
+class Pipeline(models.Model):
+    stage = models.CharField(max_length=100)
+    count = models.IntegerField()
+
+
+class QuickAction(models.Model):
+    label = models.CharField(max_length=100)
+    icon = models.CharField(max_length=255)
+    bg = models.CharField(max_length=30)
+    color = models.CharField(max_length=30)
+
+
+class UpcomingDrive(models.Model):
+    company = models.CharField(max_length=100)
+    logo = models.CharField(max_length=255)
+    date_time = models.CharField(max_length=100)
+    branches = models.CharField(max_length=255)
+
+
+class TopCompany(models.Model):
+    name = models.CharField(max_length=100)
+    count = models.IntegerField()
+    percentage = models.CharField(max_length=20)
+
+
+class PlacementStats(models.Model):
+    month = models.CharField(max_length=20)
+    applied = models.IntegerField()
+    offered = models.IntegerField()
+
+
+class DepartmentWise(models.Model):
+    name = models.CharField(max_length=50)
+    value = models.IntegerField()
+    color = models.CharField(max_length=30)
+
+
+class RecentActivity(models.Model):
+    text = models.CharField(max_length=255)
+    time = models.CharField(max_length=100)
+
+
+class CalendarSchedule(models.Model):
+    date = models.DateField()
+    company = models.CharField(max_length=100)
+    logo = models.CharField(max_length=255)
+    time = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)
+    students = models.CharField(max_length=100)
+    meeting_url = models.URLField()
+    meeting_platform = models.CharField(max_length=100)
+    status = models.CharField(max_length=100)
+    status_color = models.CharField(max_length=30)

@@ -216,3 +216,64 @@ class ResetPasswordSerializer(serializers.Serializer):
     token = serializers.CharField()
     uid = serializers.CharField()
     password = serializers.CharField(min_length=8)
+
+
+#placementofficerdashboard
+
+from rest_framework import serializers
+from .models import *
+
+
+class DashboardStatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DashboardStat
+        fields = "__all__"
+
+
+class PipelineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pipeline
+        fields = "__all__"
+
+
+class QuickActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuickAction
+        fields = "__all__"
+
+
+class UpcomingDriveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UpcomingDrive
+        fields = "__all__"
+
+
+class TopCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TopCompany
+        fields = "__all__"
+
+
+class PlacementStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlacementStats
+        fields = "__all__"
+
+
+class DepartmentWiseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DepartmentWise
+        fields = "__all__"
+
+
+class RecentActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecentActivity
+        fields = "__all__"
+
+
+class CalendarScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CalendarSchedule
+        fields = "__all__"
+        
