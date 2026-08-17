@@ -33,38 +33,37 @@ from datetime import date
 # @api_view(['POST'])
 # def recruiter_register(request):
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework.views import APIView
 
-@api_view(['GET', 'POST'])
-def recruiter_register(request):
+class RecruiterRegisterView(APIView):
 
-    if request.method == "GET":
+    def get(self, request):
         return Response({"message": "Recruiter API Working"})
 
-    # POST logic here
+    def post(self, request):
+        # POST logic here
 
-    count = Recruiter.objects.count() + 1
+        count = Recruiter.objects.count() + 1
 
-    hr_id = f"HR-{count:03}"
+        hr_id = f"HR-{count:03}"
 
-    today = date.today().strftime("%d/%m/%Y")
+        today = date.today().strftime("%d/%m/%Y")
 
-    data = request.data.copy()
+        data = request.data.copy()
 
-    data["hr_id"] = hr_id
-    data["registered_on"] = today
+        data["hr_id"] = hr_id
+        data["registered_on"] = today
 
-    serializer = RecruiterSerializer(data=data)
+        serializer = RecruiterSerializer(data=data)
 
-    if serializer.is_valid():
-        serializer.save()
-        return Response({
-            "message":"Registration Successful",
-            "data":serializer.data
-        },status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message":"Registration Successful",
+                "data":serializer.data
+            },status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 #student registration
 from rest_framework.views import APIView
@@ -180,103 +179,105 @@ class CommonLoginAPIView(APIView):
     
 #PLACEMENTOFFICERLOGIN
 
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import PlacementOfficerlogin
 
 
-@api_view(["POST"])
-def placement_login(request):
+class PlacementLoginView(APIView):
 
-    email = request.data.get("Email")
-    password = request.data.get("password")
+    def post(self, request):
 
-    if not email:
+        email = request.data.get("Email")
+        password = request.data.get("password")
+
+        if not email:
+            return Response({
+                "Email":"Email is required*"
+            },status=400)
+
+        if not password:
+            return Response({
+                "password":"Password is required*"
+            },status=400)
+
+        try:
+            user = PlacementOfficerlogin.objects.get(email=email)
+
+        except PlacementOfficerlogin.DoesNotExist:
+
+            return Response({
+                "loginError":"Invalid Email or Password. Please try again."
+            },status=400)
+
+        if user.password != password:
+
+            return Response({
+                "loginError":"Invalid Email or Password. Please try again."
+            },status=400)
+
         return Response({
-            "Email":"Email is required*"
-        },status=400)
 
-    if not password:
-        return Response({
-            "password":"Password is required*"
-        },status=400)
+            "message":"Login Successful",
 
-    try:
-        user = PlacementOfficerlogin.objects.get(email=email)
+            "user":{
 
-    except PlacementOfficerlogin.DoesNotExist:
+                "id":user.id,
+                "email":user.email
 
-        return Response({
-            "loginError":"Invalid Email or Password. Please try again."
-        },status=400)
+            }
 
-    if user.password != password:
-
-        return Response({
-            "loginError":"Invalid Email or Password. Please try again."
-        },status=400)
-
-    return Response({
-
-        "message":"Login Successful",
-
-        "user":{
-
-            "id":user.id,
-            "email":user.email
-
-        }
-
-    },status=200)
+        },status=200)
 
 #recruiterlogin
 
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from .models import RecruiterLogin
 
-@api_view(["POST"])
-def RecruiterLogin_login(request):
+class RecruiterLoginView(APIView):
 
-    email = request.data.get("Email")
-    password = request.data.get("password")
+    def post(self, request):
 
-    if not email:
+        email = request.data.get("Email")
+        password = request.data.get("password")
+
+        if not email:
+            return Response({
+                "Email":"Email is required*"
+            },status=400)
+
+        if not password:
+            return Response({
+                "password":"Password is required*"
+            },status=400)
+
+        try:
+            user = RecruiterLogin.objects.get(email=email)
+
+        except RecruiterLogin.DoesNotExist:
+
+            return Response({
+                "loginError":"Invalid Email or Password. Please try again."
+            },status=400)
+
+        if user.password != password:
+
+            return Response({
+                "loginError":"Invalid Email or Password. Please try again."
+            },status=400)
+
         return Response({
-            "Email":"Email is required*"
-        },status=400)
 
-    if not password:
-        return Response({
-            "password":"Password is required*"
-        },status=400)
+            "message":"Login Successful",
 
-    try:
-        user = RecruiterLogin.objects.get(email=email)
+            "user":{
 
-    except RecruiterLogin.DoesNotExist:
+                "id":user.id,
+                "email":user.email
 
-        return Response({
-            "loginError":"Invalid Email or Password. Please try again."
-        },status=400)
+            }
 
-    if user.password != password:
-
-        return Response({
-            "loginError":"Invalid Email or Password. Please try again."
-        },status=400)
-
-    return Response({
-
-        "message":"Login Successful",
-
-        "user":{
-
-            "id":user.id,
-            "email":user.email
-
-        }
-
-    },status=200)
+        },status=200)
 
 #studentlogin 
 from django.contrib.auth import authenticate
@@ -545,42 +546,42 @@ class ResetPasswordAPIView(APIView):
         return Response(serializer.errors, status=400)
 
 #adminDashboard
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 
-@api_view(['GET'])
-def get_admin_dashboard_data(request):
-    mock_data = {
-        "status": "success",
-        "data": {
-            "stats": {
-                "totalPlacements": "4,120",
-                "activeStudents": "12,482",
-                "verifiedRecruiters": "3,142",
-                "partnerCompanies": "312"
-            },
-            "placementData": [
-                { "month": "Jan", "placements": 22 },
-                { "month": "Feb", "placements": 34 },
-                { "month": "Mar", "placements": 28 },
-                { "month": "Apr", "placements": 47 },
-                { "month": "May", "placements": 39 },
-                { "month": "Jun", "placements": 58 }
-            ],
-            "activityLog": [
-                { "id": 1, "type": "new_user", "heading": "New User Registration", "subtitle": "Alex Morgan", "time": "2 mins ago" },
-                { "id": 2, "type": "doc_upload", "heading": "Company Document Uploaded", "subtitle": "Nexus Dynamics", "time": "45 mins ago" },
-                { "id": 3, "type": "recruiter_verify", "heading": "Recruiter Verified", "subtitle": "Global Tech", "time": "3 hrs ago" },
-                { "id": 4, "type": "security_update", "heading": "Security Policy Updated", "subtitle": "Applied globally", "time": "5 hrs ago" },
-                { "id": 5, "type": "login_failed", "heading": "Failed Login Attempt", "subtitle": "IP:192.168.1.45", "time": "8 hrs ago" }
-            ],
-            "userManagement": [
-                { "id": 1, "name": "Sarah K. Jenkins", "email": "sarah.j@globalhr.com", "role": "RECRUITER", "activity": "Published \"Senior AI Architect\" role", "time": "2 mins ago" },
-                { "id": 2, "name": "David Lee", "email": "d.lee@candidate.me", "role": "CANDIDATE", "activity": "Submitted portfolio via AI matching", "time": "1 hour ago" }
-            ]
+class AdminDashboardDataView(APIView):
+    def get(self, request):
+        mock_data = {
+            "status": "success",
+            "data": {
+                "stats": {
+                    "totalPlacements": "4,120",
+                    "activeStudents": "12,482",
+                    "verifiedRecruiters": "3,142",
+                    "partnerCompanies": "312"
+                },
+                "placementData": [
+                    { "month": "Jan", "placements": 22 },
+                    { "month": "Feb", "placements": 34 },
+                    { "month": "Mar", "placements": 28 },
+                    { "month": "Apr", "placements": 47 },
+                    { "month": "May", "placements": 39 },
+                    { "month": "Jun", "placements": 58 }
+                ],
+                "activityLog": [
+                    { "id": 1, "type": "new_user", "heading": "New User Registration", "subtitle": "Alex Morgan", "time": "2 mins ago" },
+                    { "id": 2, "type": "doc_upload", "heading": "Company Document Uploaded", "subtitle": "Nexus Dynamics", "time": "45 mins ago" },
+                    { "id": 3, "type": "recruiter_verify", "heading": "Recruiter Verified", "subtitle": "Global Tech", "time": "3 hrs ago" },
+                    { "id": 4, "type": "security_update", "heading": "Security Policy Updated", "subtitle": "Applied globally", "time": "5 hrs ago" },
+                    { "id": 5, "type": "login_failed", "heading": "Failed Login Attempt", "subtitle": "IP:192.168.1.45", "time": "8 hrs ago" }
+                ],
+                "userManagement": [
+                    { "id": 1, "name": "Sarah K. Jenkins", "email": "sarah.j@globalhr.com", "role": "RECRUITER", "activity": "Published \"Senior AI Architect\" role", "time": "2 mins ago" },
+                    { "id": 2, "name": "David Lee", "email": "d.lee@candidate.me", "role": "CANDIDATE", "activity": "Submitted portfolio via AI matching", "time": "1 hour ago" }
+                ]
+            }
         }
-    }
-    return Response(mock_data)
+        return Response(mock_data)
 
 #Training coordinator dashboard
 from rest_framework.views import APIView
