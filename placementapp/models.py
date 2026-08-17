@@ -223,3 +223,14 @@ class Admin(models.Model):
 
     def __str__(self):
         return self.email
+
+#trainingCoordinatorDashboard
+
+class DashboardSummary(models.Model):
+    active_batches = models.PositiveIntegerField()
+    total_enrollments = models.PositiveIntegerField()
+    certificates_issued = models.PositiveIntegerField()
+    upcoming_sessions = models.PositiveIntegerField()
+
+    def __str__(self):
+        return "Dashboard Summary"

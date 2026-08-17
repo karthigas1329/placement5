@@ -543,3 +543,62 @@ class ResetPasswordAPIView(APIView):
             )
 
         return Response(serializer.errors, status=400)
+
+#adminDashboard
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['GET'])
+def get_admin_dashboard_data(request):
+    mock_data = {
+        "status": "success",
+        "data": {
+            "stats": {
+                "totalPlacements": "4,120",
+                "activeStudents": "12,482",
+                "verifiedRecruiters": "3,142",
+                "partnerCompanies": "312"
+            },
+            "placementData": [
+                { "month": "Jan", "placements": 22 },
+                { "month": "Feb", "placements": 34 },
+                { "month": "Mar", "placements": 28 },
+                { "month": "Apr", "placements": 47 },
+                { "month": "May", "placements": 39 },
+                { "month": "Jun", "placements": 58 }
+            ],
+            "activityLog": [
+                { "id": 1, "type": "new_user", "heading": "New User Registration", "subtitle": "Alex Morgan", "time": "2 mins ago" },
+                { "id": 2, "type": "doc_upload", "heading": "Company Document Uploaded", "subtitle": "Nexus Dynamics", "time": "45 mins ago" },
+                { "id": 3, "type": "recruiter_verify", "heading": "Recruiter Verified", "subtitle": "Global Tech", "time": "3 hrs ago" },
+                { "id": 4, "type": "security_update", "heading": "Security Policy Updated", "subtitle": "Applied globally", "time": "5 hrs ago" },
+                { "id": 5, "type": "login_failed", "heading": "Failed Login Attempt", "subtitle": "IP:192.168.1.45", "time": "8 hrs ago" }
+            ],
+            "userManagement": [
+                { "id": 1, "name": "Sarah K. Jenkins", "email": "sarah.j@globalhr.com", "role": "RECRUITER", "activity": "Published \"Senior AI Architect\" role", "time": "2 mins ago" },
+                { "id": 2, "name": "David Lee", "email": "d.lee@candidate.me", "role": "CANDIDATE", "activity": "Submitted portfolio via AI matching", "time": "1 hour ago" }
+            ]
+        }
+    }
+    return Response(mock_data)
+
+#Training coordinator dashboard
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from .models import DashboardSummary
+from .serializers import DashboardSummarySerializer
+
+class TrainingCoordinatorDashboardView(APIView):
+
+    def get(self, request):
+        dashboard = DashboardSummary.objects.first()
+
+        if dashboard is None:
+            return Response({
+                "message": "No dashboard summary data available."
+            })
+
+        serializer = DashboardSummarySerializer(dashboard)
+        return Response(serializer.data)    
+        
