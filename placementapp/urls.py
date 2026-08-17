@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import PlacementOfficerRegisterAPIView,StudentRegistrationView,recruiter_register,StudentCoordinatorRegisterView
 from .views import CommonLoginAPIView,placement_login,RecruiterLogin_login,StudentLoginView,TrainingCoordinatorLoginView,AdminLoginView
-from .views import ForgotPasswordAPIView,ResetPasswordAPIView,get_admin_dashboard_data,TrainingCoordinatorDashboardView
+from .views import ForgotPasswordAPIView,ResetPasswordAPIView,get_admin_dashboard_data,TrainingCoordinatorDashboardView,RecruiterDashboardView
 
 urlpatterns = [
 #registration
@@ -23,5 +23,7 @@ urlpatterns = [
 #Dashboard
     path('admin-dashboard/', get_admin_dashboard_data, name='admin-dashboard'),
     path("training-coordinator/dashboard/", TrainingCoordinatorDashboardView.as_view(), name="training-coordinator-dashboard"),
+    path('recruiter-dashboard/', RecruiterDashboardView.as_view(), name='recruiter-dashboard'),
+
 ]
 

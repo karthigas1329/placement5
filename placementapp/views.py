@@ -602,3 +602,138 @@ class TrainingCoordinatorDashboardView(APIView):
         serializer = DashboardSummarySerializer(dashboard)
         return Response(serializer.data)    
         
+
+#recruiter Dashboard
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db.models import Count
+from django.utils import timezone
+
+from .models import *
+from .serializers import *
+
+class RecruiterDashboardView(APIView):
+    """
+    Single endpoint that returns everything the RecruiterDashboard needs.
+    GET /api/dashboard/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Stats – prefer stored snapshots, fall back to live counts
+        stored_stats = {s.key: s for s in DashboardStat.objects.all()}
+        active_jobs = Job.objects.filter(status='active').count()
+        new_apps = Application.objects.filter(
+            applied_at__date=timezone.now().date()
+        ).count()
+        interviews_today = Interview.objects.filter(
+            scheduled_at__date=timezone.now().date(),
+            status='scheduled'
+        ).count()
+        placements_count = Placement.objects.count()
+
+        def build_stat(key, live_value, default_badge='', default_class=''):
+            s = stored_stats.get(key)
+            if s:
+                return {
+                    'id': s.id,
+                    'key': s.key,
+                    'title': key.replace('_', ' ').upper(),
+                    'value': s.value,
+                    'badgeText': s.badge_text or default_badge,
+                    'badgeClass': s.badge_class or default_class,
+                }
+            return {
+                'id': None,
+                'key': key,
+                'title': key.replace('_', ' ').upper(),
+                'value': live_value,
+                'badgeText': default_badge,
+                'badgeClass': default_class,
+            }
+
+        stats = [
+            build_stat('active_jobs', active_jobs, '+12% VS LAST MO', 'Rec-Dashboard-badge-positive'),
+            build_stat('new_applications', new_apps or Application.objects.count(), '+4 NEW TODAY', 'Rec-Dashboard-badge-blue'),
+            build_stat('interviews_today', interviews_today, 'URGENT', 'Rec-Dashboard-badge-urgent'),
+            build_stat('placements', placements_count, 'Target: 20', 'Rec-Dashboard-badge-target'),
+        ]
+
+        # Pipeline
+        stage_map = {
+            'sourcing': 'SOURCING',
+            'applied': 'APPLIED',
+            'interviewing': 'INTERVIEWING',
+            'offer': 'OFFER STAGE',
+        }
+        stage_counts = dict(
+            Application.objects.values('stage').annotate(c=Count('id')).values_list('stage', 'c')
+        )
+        # Include sourcing even if zero applications in that stage
+        max_count = max(stage_counts.values()) if stage_counts else 1
+        pipeline = []
+        for key, label in stage_map.items():
+            count = stage_counts.get(key, 0)
+            pct = int((count / max_count) * 100) if max_count else 0
+            pipeline.append({
+                'stage': label,
+                'count': count,
+                'percentage': f'{pct}%',
+            })
+
+        pipeline_metrics = [
+            {'label': 'AVG. RESPONSE', 'value': '4.2d'},
+            {'label': 'CONVERSION', 'value': '18%'},
+            {'label': 'TIME TO HIRE', 'value': '22d'},
+        ]
+
+        # Upcoming interviews
+        interviews_qs = Interview.objects.filter(
+            scheduled_at__gte=timezone.now(),
+            status='scheduled'
+        ).select_related('application__candidate', 'application__job')[:10]
+        interviews = InterviewSerializer(interviews_qs, many=True).data
+
+        # Resume verification table (from candidates + latest application status)
+        verifications = []
+        for c in Candidate.objects.all()[:20]:
+            app = c.applications.order_by('-applied_at').first()
+            status_label = app.status if app else 'pending'
+            verifications.append({
+                'id': c.id,
+                'candidate': c.name,
+                'resume': {
+                    'label': 'Verified' if c.resume_verified else 'Pending',
+                    'verified': c.resume_verified,
+                },
+                'portfolio': {
+                    'label': 'Available' if c.portfolio_available else 'Not Available',
+                    'available': c.portfolio_available,
+                },
+                'status': {
+                    'label': status_label.capitalize(),
+                    'value': status_label,
+                },
+            })
+
+        ai_insights = AIInsightSerializer(
+            AIInsight.objects.filter(is_active=True)[:5], many=True
+        ).data
+
+        quick_links = QuickLinkSerializer(
+            QuickLink.objects.filter(is_active=True), many=True
+        ).data
+
+        return Response({
+            'user': UserSerializer(request.user).data,
+            'stats': stats,
+            'pipeline': pipeline,
+            'pipeline_metrics': pipeline_metrics,
+            'interviews': interviews,
+            'verifications': verifications,
+            'ai_insights': ai_insights,
+            'quick_links': quick_links,
+        })
+
